@@ -4,7 +4,16 @@ import socket
 import time
 
 class TCPServer:
-    def __init__(self, host: str, port: int, receive_callback=None):
+    def __init__(self, host: str, port: int, receive_callback=None, packet_size: int=2048):
+        """Initialize the TCP server.
+        This server listens for incoming TCP connections and processes received messages.
+
+        Args:
+            host (str): The hostname or IP address to bind the server to.
+            port (int): The port number to listen on.
+            receive_callback (function(respond: bytes), optional): A callback function to handle received messages.
+            packet_size (int, optional): The maximum size of a packet to receive.
+        """
         self._host = host
         self._port = port
         if receive_callback is not None:
@@ -13,6 +22,7 @@ class TCPServer:
             self._receive_callback = lambda x: print(x.decode('utf-8').strip('\0'))
         self._server_socket = None
         self._message_queue = Queue()
+        self.PACKET_SIZE = packet_size
 
     def start_server(self):
         """Start the TCP server and listen for incoming connections."""
@@ -35,12 +45,11 @@ class TCPServer:
         while True:
             try:
                 reply = ""
-                reply = conn.recv(2048)
+                reply = conn.recv(self.PACKET_SIZE)
                 if not reply:
                     print("Client disconnected.")
                     break
                 
-                time.sleep(1)
                 self._receive_callback(reply)
                 message = self._message_queue.get()
                 if message is None:

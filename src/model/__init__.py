@@ -5,7 +5,7 @@ import requests
 class ImageToEmoji:
     """
     A class to interact with the OpenAI API to convert images into a string of emojis.
-    ### Usage:
+    ### How to Use:
     ~~~~~~~~~~~~~~~~~~
     Auto detect:
         >>> model = ImageToEmoji()
@@ -15,6 +15,7 @@ class ImageToEmoji:
     Base64 encoded image:
         >>> model = ImageToEmoji()
         >>> response = model.send_image(image_b64, type='base64')
+        # image_b64 is a base64 encoded string of the image.
         
     Image file path:
         >>> model = ImageToEmoji()
@@ -41,7 +42,7 @@ class ImageToEmoji:
             
         self._model = model
 
-    def send_image(self, image, type=None):
+    def send_image(self, image: str, type=None):
         """
         Send an image to the OpenAI API and get a response.
         Args:
@@ -53,12 +54,24 @@ class ImageToEmoji:
         if not self._api_key:
             raise ValueError("API key is not set. Please set the OPENAI_API_KEY environment variable.")
         
+        def _is_base64(s: str):
+            try:
+                # base64 字串長度必須為4的倍數
+                if not isinstance(s, str) or len(s) % 4 != 0:
+                    return False
+                base64.b64decode(s, validate=True)
+                return True
+            except Exception:
+                return False
+
         if type is None:
             if isinstance(image, str):
                 if os.path.isfile(image):
                     type = 'path'
                 elif image.startswith("http://") or image.startswith("https://"):
                     type = 'url'
+                elif _is_base64(image):
+                    type = 'base64'
                 else:
                     raise ValueError("Cannot detect image type. Provide a valid type ('base64', 'path', or 'url').")
             elif isinstance(image, bytes):
@@ -71,7 +84,7 @@ class ImageToEmoji:
             case 'path':
                 if not os.path.isfile(image):
                     raise ValueError("File does not exist.")
-                image_b64 = self._image_to_base64(image)
+                image_b64 = self.image_to_base64(image)
             case 'url':
                 image_b64 = self._fetch_image_from_url(image)
             case _:
@@ -109,7 +122,7 @@ class ImageToEmoji:
         response.raise_for_status()
         return response.json()["choices"][0]["message"]["content"]
     
-    def _image_to_base64(self, image_path: str):
+    def image_to_base64(self, image_path: str):
         """Convert an image file to a base64 encoded string."""
         with open(image_path, "rb") as img_file:
             return base64.b64encode(img_file.read()).decode('utf-8')
