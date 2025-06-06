@@ -3,6 +3,9 @@ from src.model import ImageToEmoji
 from src.backend import BackPlug
 from multiprocessing import Process
 import tkinter as tk
+import logging
+import datetime
+import os
 
 server = None
 model = None
