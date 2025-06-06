@@ -34,15 +34,22 @@ class ImageToEmoji:
     The default model is `gpt-4.1-nano`, but you can specify a different model if needed.
     """
     
-    def __init__(self, api_key: str = None, model: str = "gpt-4.1-nano"):
+    def __init__(self, api_key: str=None, model: str="gpt-4.1-nano", prompt_path: str=None):
         if not api_key:
             self._api_key = os.getenv("OPENAI_API_KEY")
         else:
             self._api_key = api_key
             
         self._model = model
+        if prompt_path is not None:
+            with open(prompt_path, 'r') as file:
+                self._system_prompt = file.read()
+        else:
+            self._system_prompt = ''
+            
+        
 
-    def send_image(self, image: str, type=None):
+    def send_image(self, image: str, type=None, prompt=''):
         """
         Send an image to the OpenAI API and get a response.
         Args:
@@ -56,7 +63,6 @@ class ImageToEmoji:
         
         def _is_base64(s: str):
             try:
-                # base64 字串長度必須為4的倍數
                 if not isinstance(s, str) or len(s) % 4 != 0:
                     return False
                 base64.b64decode(s, validate=True)
@@ -66,7 +72,9 @@ class ImageToEmoji:
 
         if type is None:
             if isinstance(image, str):
-                if os.path.isfile(image):
+                if image.startswith("data:image/") and ";base64," in image:
+                    type = 'base64'
+                elif os.path.isfile(image):
                     type = 'path'
                 elif image.startswith("http://") or image.startswith("https://"):
                     type = 'url'
@@ -80,7 +88,10 @@ class ImageToEmoji:
                 raise ValueError("Unsupported image format. Provide a valid type ('base64', 'path', or 'url').")
         match type:
             case 'base64':
-                image_b64 = image
+                if image.startswith("data:image/") and ";base64," in image:
+                    image_b64 = image.split(",")[1]
+                else:
+                    image_b64 = image
             case 'path':
                 if not os.path.isfile(image):
                     raise ValueError("File does not exist.")
@@ -105,7 +116,7 @@ class ImageToEmoji:
                 {
                     "role": "user",
                     "content": [
-                        {"type": "text", "text": "Output only 10 emojis that are most relevant to this image. No text, no explanation, only emojis in a single line."},
+                        {"type": "text", "text": prompt},
                         {
                             "type": "image_url",
                             "image_url": {

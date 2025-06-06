@@ -2,6 +2,7 @@ import socket
 import tkinter as tk
 from tkinter import filedialog, simpledialog, messagebox
 import base64
+from multiprocessing import Process
 
 class TCPClient:
     def __init__(self, host: str, port: int):
@@ -146,10 +147,21 @@ def main_ui(client: TCPClient):
     btns["exit"].pack(pady=10)
 
     root.mainloop()
-
-if __name__ == "__main__":
-    client = TCPClient(host="localhost", port=12345)
+    
+def run_client():
+    client = TCPClient(host="localhost", port=8888)
     try:
         main_ui(client)
     finally:
         client.close()
+
+if __name__ == "__main__":
+    N = 5
+    processes = []
+    for _ in range(N):
+        p = Process(target=run_client)
+        processes.append(p)
+        p.start()
+
+    for p in processes:
+        p.join() 

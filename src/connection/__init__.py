@@ -1,5 +1,5 @@
 from queue import Queue
-from threading import Thread
+from threading import Thread, Lock
 import socket
 import time
 
@@ -22,6 +22,8 @@ class TCPServer:
             self._receive_callback = lambda x: print(x.decode('utf-8').strip('\0'))
         self._server_socket = None
         self._message_queue = Queue()
+        self._clients = []
+        self._clients_lock = Lock()
         self.PACKET_SIZE = packet_size
 
     def start_server(self):
@@ -50,8 +52,7 @@ class TCPServer:
                     print("Client disconnected.")
                     break
                 
-                self._receive_callback(reply)
-                message = self._message_queue.get()
+                message = self._receive_callback(reply)
                 if message is None:
                     print("No message to send")
                     continue
@@ -71,14 +72,26 @@ class TCPServer:
             raise RuntimeError("Server not started. Call start_server() first.")
         try:
             while True:
-                conn, addr = self._server_socket.accept()
-                self._handle_client(conn, addr)
-                time.sleep(1)
+                client_socket, addr = self._server_socket.accept()
+                with self._clients_lock:
+                    self._clients.append(client_socket)
+                    
+                Thread(target=self._handle_client, args=(client_socket, addr), daemon=True).start()
+        except KeyboardInterrupt:
+            print("Server closing...")
         except Exception as e:
             print(e)
         finally:
             self._server_socket.close()
-            
-    def send_message(self, message: bytes):
-        """Send a message to the client."""
-        self._message_queue.put(message)
+            self._server_socket = None
+            for client in self._clients:
+                client.close()
+            print("Server stopped.")
+                
+    def stop_server(self):
+        """Stop the TCP server and close all client connections."""
+        if self._server_socket:
+            try:
+                self._server_socket.close()
+            except Exception as e:
+                print(f"Error closing server socket: {e}")

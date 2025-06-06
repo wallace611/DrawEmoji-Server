@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>Image to Emoji Testing</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="frontend/connection.js"></script>
+  <style>
+    canvas {
+      border: 1px solid black;
+      touch-action: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Image to Emoji Testing</h1>
+
+  <input id="nameInput" type="text" placeholder="請輸入你的名稱..." />
+  <input id="msgInput" type="text" placeholder="輸入圖片 base64..." />
+  <button onclick="sendMessage()">傳送圖片</button>
+  <input id="prmpInput" type="text" placeholder="輸入 prompt..." />
+  <p id="responseArea"></p>
+  <hr>
+
+  <h2>畫圖區域</h2>
+  <canvas id="drawCanvas" width="400" height="300"></canvas>
+  <br>
+  <button onclick="sendCanvas()">送出畫布圖片</button>
+  <button onclick="clearCanvas()">清除畫布</button>
+
+  <script src="frontend/canvas.js"></script>
+  <hr>
+  <h2>歷史紀錄</h2>
+  <input id="nameSearch" type="text" placeholder="輸入名稱查詢，空白則載入全部" />
+  <button onclick="loadHistory()">查詢歷史紀錄</button>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>名稱</th>
+        <th>時間</th>
+        <th>Emoji</th>
+        <th>圖片</th>
+        <th>歷史ID</th>
+        <th>回饋</th>
+      </tr>
+    </thead>
+    <tbody id="historyList"></tbody>
+  </table>
+</body>
+</html>
