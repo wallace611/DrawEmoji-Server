@@ -32,7 +32,12 @@
   <hr>
   <h2>歷史紀錄</h2>
   <input id="nameSearch" type="text" placeholder="輸入名稱查詢，空白則載入全部" />
-  <button onclick="loadHistory()">查詢歷史紀錄</button>
+  <button onclick="loadHistory(1)">查詢歷史紀錄</button>
+  <div id="paginationControls">
+    <button onclick="prevPage()">上一頁</button>
+    <span id="pageInfo">第 1 頁</span>
+    <button onclick="nextPage()">下一頁</button>
+  </div>
   <table border="1">
     <thead>
       <tr>

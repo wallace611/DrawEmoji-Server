@@ -106,6 +106,52 @@ class Database:
         conn.close()
         return rows
     
+    def get_history_by_cookie_paged(self, cookie: str, offset: int, limit: int) -> List[Tuple]:
+        conn = self._connect()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT h.id, i.image_base64, i.emoji, i.timestamp
+            FROM History h
+            JOIN ImageResult i ON h.image_result_id = i.id
+            WHERE h.cookie = ?
+            ORDER BY i.timestamp DESC
+            LIMIT ? OFFSET ?;
+        ''', (cookie, limit, offset))
+        rows = cursor.fetchall()
+        conn.close()
+        return rows
+
+    def get_all_history_paged(self, offset: int, limit: int) -> List[Tuple]:
+        conn = self._connect()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT h.cookie, h.id, i.image_base64, i.emoji, i.timestamp
+            FROM History h
+            JOIN ImageResult i ON h.image_result_id = i.id
+            ORDER BY i.timestamp DESC
+            LIMIT ? OFFSET ?;
+        ''', (limit, offset))
+        rows = cursor.fetchall()
+        conn.close()
+        return rows
+    
+    def get_history_count_by_cookie(self, cookie: str) -> int:
+        conn = self._connect()
+        cursor = conn.cursor()
+        cursor.execute('SELECT COUNT(*) FROM History WHERE cookie = ?;', (cookie,))
+        count = cursor.fetchone()[0]
+        conn.close()
+        return count
+
+    def get_total_history_count(self) -> int:
+        conn = self._connect()
+        cursor = conn.cursor()
+        cursor.execute('SELECT COUNT(*) FROM History;')
+        count = cursor.fetchone()[0]
+        conn.close()
+        return count
+
+
     def get_all_history(self):
         conn = self._connect()
         cursor = conn.cursor()

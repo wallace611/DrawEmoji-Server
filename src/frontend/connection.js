@@ -1,3 +1,8 @@
+let currentPage = 1;
+const pageSize = 10;
+let totalPages = 1;
+let currentUserName = '';
+
 async function sendMessage() {
     const msg = document.getElementById('msgInput').value;
     let name = document.getElementById('nameInput').value;
@@ -29,60 +34,79 @@ async function sendMessage() {
     }
 }
 
-async function loadHistory() {
+async function loadHistory(page = 1) {
+    currentPage = page;
+    const offset = (currentPage - 1) * pageSize;
     const list = document.getElementById('historyList');
     const nameInput = document.getElementById('nameSearch');
     const userName = nameInput?.value?.trim();
+    currentUserName = userName;
+
     list.innerHTML = '';
 
     const url = userName ? '/history' : '/history_all';
     const fetchOptions = userName
-    ? {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_name: userName })
+        ? {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_name: userName, offset: offset, limit: pageSize })
         }
-    : { method: 'GET' };
-
+        : {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ offset: offset, limit: pageSize })
+        };
+    const finalUrl = url;
     try {
-    const res = await fetch(url, fetchOptions);
-    const data = await res.json();
-    if (data.status === 'ok') {
-        for (const item of data.history) {
-        const tr = document.createElement('tr');
+        const res = await fetch(finalUrl, fetchOptions);
+        const data = await res.json();
+        if (data.status === 'ok') {
+            totalPages = Math.ceil(data.total / pageSize);
+            document.getElementById('pageInfo').textContent = `第 ${currentPage} 頁 / 共 ${totalPages} 頁`;
 
-        const tdName = `<td>${item.user_name || userName || 'unnamed'}</td>`;
-        const tdTime = `<td>${item.timestamp}</td>`;
-        const tdEmoji = `<td>${item.emoji}</td>`;
-        const tdImgBtn = `
-            <td>
-            <button onclick="toggleImage(this, '${item.image_base64}')">顯示圖片</button>
-            <div style="display:none;"></div>
-            </td>`;
-        const tdId = `
-            <td>
-            ${item.history_id}
-            </td>
-        `;
-        const tdFeedback = `
-            <td>
-            <button onclick="showFeedbackForm(this, ${item.history_id}, '${item.image_base64}')">回饋</button>
-            <div class="feedback-form" style="display:none;">
-                <input type="number" min="1" max="5" placeholder="評分 (1-5)">
-                <input type="text" placeholder="留言...">
-                <button onclick="submitFeedback(this, ${item.history_id}, '${item.user_name || userName || 'unnamed'}')">送出</button>
-                <p class="status"></p>
-            </div>
-            </td>`;
+            for (const item of data.history) {
+                const tr = document.createElement('tr');
 
-        tr.innerHTML = tdName + tdTime + tdEmoji + tdImgBtn + tdId + tdFeedback;
-        list.appendChild(tr);
+                const tdName = `<td>${item.user_name || userName || 'unnamed'}</td>`;
+                const tdTime = `<td>${item.timestamp}</td>`;
+                const tdEmoji = `<td>${item.emoji}</td>`;
+                const tdImgBtn = `
+                    <td>
+                    <button onclick="toggleImage(this, '${item.image_base64}')">顯示圖片</button>
+                    <div style="display:none;"></div>
+                    </td>`;
+                const tdId = `<td>${item.history_id}</td>`;
+                const tdFeedback = `
+                    <td>
+                    <button onclick="showFeedbackForm(this, ${item.history_id}, '${item.image_base64}')">回饋</button>
+                    <div class="feedback-form" style="display:none;">
+                        <input type="number" min="1" max="5" placeholder="評分 (1-5)">
+                        <input type="text" placeholder="留言...">
+                        <button onclick="submitFeedback(this, ${item.history_id}, '${item.user_name || userName || 'unnamed'}')">送出</button>
+                        <p class="status"></p>
+                    </div>
+                    </td>`;
+
+                tr.innerHTML = tdName + tdTime + tdEmoji + tdImgBtn + tdId + tdFeedback;
+                list.appendChild(tr);
+            }
+        } else {
+            list.innerHTML = `<tr><td colspan="6">錯誤: ${data.error}</td></tr>`;
         }
-    } else {
-        list.innerHTML = `<tr><td colspan="5">錯誤: ${data.error}</td></tr>`;
-    }
     } catch (err) {
-    list.innerHTML = `<tr><td colspan="5">連線失敗: ${err}</td></tr>`;
+        list.innerHTML = `<tr><td colspan="6">連線失敗: ${err}</td></tr>`;
+    }
+}
+
+function prevPage() {
+    if (currentPage > 1) {
+        loadHistory(currentPage - 1);
+    }
+}
+
+function nextPage() {
+    if (currentPage < totalPages) {
+        loadHistory(currentPage + 1);
     }
 }
 
