@@ -5,6 +5,7 @@
   <title>Image to Emoji Testing</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="frontend/connection.js"></script>
+  <link rel="stylesheet" href="frontend/style.css">
   <style>
     canvas {
       border: 1px solid black;
@@ -13,10 +14,35 @@
   </style>
 </head>
 <body>
-  <h1>Image to Emoji Testing</h1>
+  <h1>Emoji 辨識測試平台</h1>
+  <div style="background: #f0f0f0; border: 1px solid #ccc; padding: 10px; margin-bottom: 20px;">
+    <h3>歡迎來到 emoji 辨識平台，以下是使用說明</h3>
+    <h4>基礎操作區域說明</h4>
+    <ul>
+      <li>名稱欄位可填寫名稱，將會顯示在歷史紀錄內</li>
+      <li>若未輸入名稱，系統將記錄為「unnamed」。</li>
+      <li>第二個欄位可輸入圖片的 base64 格式或是圖片的 url</li>
+      <li>確認以上都有填寫後，即可點擊「傳送圖片」將圖片送去分析</li>
+      <li>分析完成後會於下方顯示結果</li>
+    </ul>
+    <h4>畫圖區域說明</h4>
+    <ul>
+      <li>在畫框使用觸控或是滑鼠左鍵畫圖</li>
+      <li>畫圖完成按下「送出畫布圖片」即可將圖片送去分析</li>
+      <li>將於上方顯示結果</li>
+    </ul>
+    <h4>歷史紀錄說明</h4>
+    <ul>
+      <li>點擊「查詢歷史紀錄」即可查詢</li>
+      <li>文字輸入框可輸入想搜尋的使用者名稱</li>
+      <li>如留空則查詢所有歷史紀錄</li>
+      <li>翻頁請不要翻太快窩:D</li>
+    </ul>
+  </div>
 
+  <h2>基礎操作區域</h2>
   <input id="nameInput" type="text" placeholder="請輸入你的名稱..." />
-  <input id="msgInput" type="text" placeholder="輸入圖片 base64..." />
+  <input id="msgInput" type="text" placeholder="輸入圖片 base64 或 url..." />
   <button onclick="sendMessage()">傳送圖片</button>
   <input id="prmpInput" type="text" placeholder="輸入 prompt..." />
   <p id="responseArea"></p>

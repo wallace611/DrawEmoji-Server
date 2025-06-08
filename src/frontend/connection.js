@@ -9,6 +9,8 @@ async function sendMessage() {
     const responseArea = document.getElementById('responseArea');
     const prompt = document.getElementById('prmpInput').value;
 
+    responseArea.textContent = '已送出，等待伺服器回應...'
+
     if (!name) {
     name = 'unnamed'
     }
@@ -160,9 +162,9 @@ async function submitFeedback(button, imageResultId) {
     });
     const data = await res.json();
     if (data.status === 'ok') {
-        status.textContent = '✅ 回饋送出成功';
+        status.textContent = '回饋送出成功';
     } else {
-        status.textContent = '❌ 錯誤: ' + data.error;
+        status.textContent = '錯誤: ' + data.error;
     }
     } catch (err) {
     status.textContent = '送出失敗: ' + err;
