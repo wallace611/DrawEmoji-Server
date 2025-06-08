@@ -110,7 +110,7 @@ class BackPlug:
         comment = data.get("comment", "")
 
         if not user_name:
-            return jsonify({"status": "error", "error": "Missing user name"}), 400
+            user_name = 'unnamed'
         if not isinstance(image_result_id, int) or not (1 <= rating <= 5):
             return jsonify({"status": "error", "error": "Invalid rating or image_result_id"}), 400
 
