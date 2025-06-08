@@ -38,7 +38,7 @@ def toggle_server():
         # Start server
         server = TCPServer(host='127.0.0.1', port=8888, receive_callback=receive_callback, packet_size=2000000)
         server.start_server_nowait()
-        model = ImageToEmoji(prompt_path='src/model/model_prompt.txt')
+        model = ImageToEmoji(prompt_path='src/model/model_prompt.txt', model='gpt-4.1-2025-04-14')
         backend_process = Process(target=_start_backend_api, daemon=True)
         backend_process.start()
         status_var.set("Server is running")

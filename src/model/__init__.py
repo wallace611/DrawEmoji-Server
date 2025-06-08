@@ -137,7 +137,7 @@ class ImageToEmoji:
             "messages": [
                 {
                     "role": "system",
-                    "content": "Output 10 different emoji based on the following instructions."
+                    "content": "Output 10 different emoji based on the following instructions, don't output others texts, just emoji."
                 },
                 {
                     "role": "user",
