@@ -111,7 +111,7 @@ class ImageToEmoji:
             "messages": [
                 {
                     "role": "system",
-                    "content": "Output only 10 emojis that are most relevant to the image. No text, no explanation, only emojis in a single line."
+                    "content": "Describe this image."
                 },
                 {
                     "role": "user",
@@ -126,9 +126,26 @@ class ImageToEmoji:
                     ]
                 }
             ],
-            "max_tokens": 300
+            "max_tokens": 1000
         }
         
+        response = requests.post(url, headers=headers, json=data)
+        response.raise_for_status()
+        
+        data = {
+            "model": self._model,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "Output 10 different emoji based on the following instructions."
+                },
+                {
+                    "role": "user",
+                    "content": response.json()['choices'][0]['message']['content']
+                }
+            ],
+            "max_tokens": 100
+        }
         response = requests.post(url, headers=headers, json=data)
         response.raise_for_status()
         return response.json()["choices"][0]["message"]["content"]
